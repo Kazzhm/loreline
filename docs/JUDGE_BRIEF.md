@@ -18,7 +18,7 @@ The decision depends on old creator context. Loreline uses a stable Mind identit
 
 ## How is memory used?
 
-Session A stores a canon rule. Session B deliberately omits it. The Mind must retrieve and apply the earlier rule to a new fan submission.
+Session A stores a canon rule. Session B deliberately omits it and receives a revision request. Session C supplies only the revision; the Mind retrieves both the rule and the prior issue before deciding again.
 
 ## How is autonomy used?
 
@@ -34,7 +34,7 @@ After approval, a compact receipt lets creators, contributors, and publishers in
 
 ## Does it work?
 
-The web product, official client integration, stable aliases, failure handling, and public health check are working. Authenticated persistence and autonomy are `NOT WORKING YET` until a real Mind and Builder key are configured and recorded. No substitute result is presented.
+The production web product, official client integration, three-stage continuity, durable memory, asynchronous reply correlation, and failure handling are working. The receipt contract and wallet states pass local tests. Test-network deployment and platform-initiated autonomy remain `NOT WORKING YET`; no substitute result is presented.
 
 ## 60-Second Explanation
 

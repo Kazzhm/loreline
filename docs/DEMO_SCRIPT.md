@@ -12,7 +12,7 @@
 
 Open Session A. Store: "The Glass Sea cannot be crossed at night; moonlight turns every vessel back toward its port of origin."
 
-Show the real Mind reply and history fingerprint. Close the session.
+Show the real Mind reply. Leave Session A and switch to Session B.
 
 ## 0:43–1:06 — Session B and Magic Moment
 
@@ -26,9 +26,9 @@ Point out that the prompt does not repeat the canon rule. Show:
 
 Read one short line from the real Mind response explaining the conflict.
 
-## 1:06–1:22 — Continuity and Follow-up
+## 1:06–1:22 — Session C and Continuity
 
-Show the case remains open with a requested revision. Trigger or reveal the later due-case action. Submit the revised idea and show the Mind continues the same case.
+Show the case remains open with a requested revision. Submit only the daylight revision in Session C. Show that the Mind recalls the rule and prior issue, then accepts the change. If verified autonomy evidence is available, reveal it briefly; otherwise do not claim it.
 
 ## 1:22–1:35 — Attribution
 

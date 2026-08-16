@@ -30,6 +30,7 @@
 - The wallet approval interface handles disconnected wallet, wrong network, rejected signature, pending, failed, and confirmed states.
 - A Base Sepolia-only deployment page is ready and waits for an explicit wallet signature.
 - Session C continues the same case with a revised contribution before the receipt approval gate appears.
+- Production Session C recalled the exact standing rule and prior conflict, then accepted the compliant daylight revision.
 
 ## In Progress
 

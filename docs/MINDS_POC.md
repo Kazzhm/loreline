@@ -24,7 +24,7 @@ Verified on 2026-08-16:
 
 ## Verified Production Run
 
-Verified on 2026-08-16 using three independent production HTTP requests.
+Verified on 2026-08-16 and 2026-08-17 using independent production HTTP requests.
 Session A and Session B used the same deterministic creator-scoped alias, and
 an independent history retrieval returned all four records. Identifiers and
 raw private conversation evidence are intentionally excluded from the public
@@ -36,9 +36,19 @@ that complete rule and proposed a living courier carrying one through the
 gate. The Mind recalled both constraints, declined the proposal, explained the
 two violations, and proposed a canon-amendment or rewrite path.
 
-Observed response time varied substantially. Session B completed close to the
-route's three-minute timeout, so timeout recovery and asynchronous progress
-handling remain submission-critical reliability work.
+Observed response time varied substantially. The production workflow now sends
+a short duplicate-safe request and polls with an encrypted ten-minute result
+token, so a long Mind response no longer occupies one server request.
+
+## Three-Stage Case Proof
+
+Session C was verified in production on 2026-08-17. Its prompt contained only a
+revised submission that moved the crossing to after sunrise. It did not repeat
+the standing canon rule or the earlier decision. The Mind recalled the exact
+night-crossing constraint and the prior conflict, accepted the compliant
+revision, explained why daylight changed the result, and returned a next
+action. Raw replies and conversation identifiers remain excluded from the
+public repository.
 
 ## Durable Memory Proof
 
@@ -131,11 +141,17 @@ The second run continued the same creator-review workflow with the same alias.
 An additional history request returned both earlier creator messages and both
 Mind replies.
 
+Session C then continued the same open case. It recalled both the original rule
+and the prior issue before evaluating the revision, demonstrating continuity
+across a three-stage creator workflow rather than two isolated questions.
+
 ## Autonomy Proof Target
 
 Autonomous execution remains `NOT WORKING YET`. A scheduled proof did not
-produce a later Mind action during the observation window. Loreline will revise
-the trigger and rerun the proof; scheduling a case is not treated as execution.
+produce a later Mind action during the observation window. An authenticated
+daily product-owned trigger is deployed as a reliability fallback, but it is
+reported separately and is not counted as platform-initiated autonomy. Its
+first production observation window begins at 00:00 UTC on 2026-08-17.
 
 ## Reply Correlation
 
@@ -151,7 +167,7 @@ with a later timestamp. A regression test covers the stale-reply case.
 | Missing API key | 503 with setup-required state; no request sent |
 | Missing Mind ID | 503 with setup-required state |
 | Invalid creator ID | 400; no alias created |
-| API timeout | 504-style application error; no success claim |
+| Result window expires | 410 job-expired response; no success claim |
 | Stale reply | Reject replies older than the exact sent message |
 | Malformed reply | Preserve raw history metadata and mark response invalid |
 | History unavailable | Report unavailable; do not infer memory |
@@ -167,5 +183,7 @@ with a later timestamp. A regression test covers the stale-reply case.
 - [x] Independent history retrieval returns the full four-record sequence.
 - [x] A fresh conversation recalls the authorized world and both canon clauses.
 - [x] Fresh-conversation history contains only its own two records.
+- [x] Session C recalls the earlier rule and decision before accepting a revision.
+- [x] Duplicate-safe asynchronous production polling returns the correlated reply.
 - [x] Public evidence contains no credentials.
 - [ ] Autonomy proof produces a later Mind action.
