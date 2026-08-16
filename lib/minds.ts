@@ -122,8 +122,10 @@ export async function runMindsOperatorAction(action: OperatorAction) {
     ].join("\n"),
     build: [
       "The proposed private Loreline Due Case Steward Skill is approved.",
+      "Use a multi-case queue across creator worlds, with each case isolated by caseId and canon reference.",
+      "Each dueAtUtc gets one fire only, with no automatic reschedule unless the creator explicitly requests one. Enforce idempotency by caseId plus dueAtUtc.",
       "Finish building it now with the narrow trigger and permission boundaries already described.",
-      "Keep it private and do not publish it to the Bazaar. Confirm only after the Skill is built and available to this Mind.",
+      "Keep it private and unlisted, activate it only on this Mind, and do not publish it to the Bazaar. Confirm only after the Skill is built and available to this Mind.",
     ].join("\n"),
     inspect: [
       "Inspect the Loreline Due Case Steward Skill now.",
