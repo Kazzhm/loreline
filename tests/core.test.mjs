@@ -20,6 +20,17 @@ test("contains the Loreline product shell and metadata", async () => {
   assert.match(consoleSource, /Mind activity trace/i);
 });
 
+test("keeps conversation evidence behind the public API boundary", async () => {
+  const [routeSource, mindsSource] = await Promise.all([
+    readFile(new URL("../app/api/minds/poc/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/minds.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(routeSource, /\["seed", "review"\]/);
+  assert.doesNotMatch(routeSource, /"history"/);
+  assert.doesNotMatch(mindsSource, /return \{ alias, history/);
+  assert.doesNotMatch(mindsSource, /fingerprint: outcome\.reply\.fingerprint/);
+});
+
 test("reports missing Minds configuration without inventing a result", async () => {
   const previousKey = process.env.MINDS_BUILDER_API_KEY;
   const previousMind = process.env.MINDS_MIND_ID;
