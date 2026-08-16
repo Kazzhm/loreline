@@ -5,6 +5,7 @@ import {
 } from "@animocabrands/minds-client-lib";
 
 export type PocAction = "seed" | "review" | "history";
+export type OperatorAction = "skills" | "propose" | "build" | "inspect" | "schedule" | "history";
 
 export class MindsSetupError extends Error {
   constructor(message: string) {
@@ -76,14 +77,91 @@ export async function getMindsStatus() {
     configured: true,
     connected: true,
     mind: {
-      mindId: mind.mindId,
-      name: mind.name ?? "Configured Mind",
       isEnabled: mind.isEnabled ?? null,
-      species: mind.species ?? null,
-      chain: mind.chain ?? null,
-      hasWallet: Boolean(mind.walletAddress),
     },
   } as const;
+}
+
+export async function runMindsOperatorAction(action: OperatorAction) {
+  const config = readConfig();
+  const client = createMindsClient({ builderApiKey: config.builderApiKey });
+
+  if (action === "skills") {
+    const skills = await client.listEquippedSkills(config.mindId);
+    return {
+      count: skills.length,
+      skills: skills.map((skill) => ({
+        skillId: skill.skillId,
+        name: skill.name ?? null,
+        source: skill.source ?? null,
+      })),
+    };
+  }
+
+  const alias = `${config.prefix}-steward-configuration`;
+  await client.ensureConversation(alias, config.mindId);
+
+  if (action === "history") {
+    const history = await client.getHistory(alias, { limit: 100 });
+    return {
+      history: publicHistory(history).map(({ sender, messageText, createdAt }) => ({
+        sender,
+        messageText,
+        createdAt,
+      })),
+    };
+  }
+
+  const messages: Record<Exclude<OperatorAction, "skills" | "history">, string> = {
+    propose: [
+      "Design a private Skill named Loreline Due Case Steward.",
+      "It should remember an unresolved creator-community review case, its due time, the creator-world context, and the approval boundary.",
+      "At the due time, without waiting for a new human message, it should re-evaluate the case from durable context and proactively send the creator: recalled context, provisional decision, one reason, and next action.",
+      "It must never approve, publish, contact a contributor, transfer assets, or issue a rights receipt without explicit creator approval.",
+      "For this proof, it needs no external app. First propose the playbook, trigger, stored fields, and permission boundaries. Do not build it yet.",
+    ].join("\n"),
+    build: [
+      "The proposed private Loreline Due Case Steward Skill is approved.",
+      "Finish building it now with the narrow trigger and permission boundaries already described.",
+      "Keep it private and do not publish it to the Bazaar. Confirm only after the Skill is built and available to this Mind.",
+    ].join("\n"),
+    inspect: [
+      "Inspect the Loreline Due Case Steward Skill now.",
+      "Report its trigger, stored fields, allowed actions, forbidden actions, external connections, and whether it is active on this Mind.",
+      "Do not broaden its permissions and do not publish it.",
+    ].join("\n"),
+    schedule: [
+      "Use the Loreline Due Case Steward Skill for a one-time proof case.",
+      "The unresolved case is a creator review of a community proposal that conflicts with stored canon. Its approval state is pending and the only allowed action is to prepare a recommendation for the creator.",
+      "Schedule the due time for five minutes from now. At that time, without waiting for another human message, send a proactive follow-up in this conversation containing: recalled context, provisional decision, one reason, and next action.",
+      "Do not approve, publish, contact a contributor, transfer assets, or issue a receipt. Confirm the scheduled due time and the approval boundary now.",
+    ].join("\n"),
+  };
+
+  const messageText = messages[action];
+  const before = await client.getLatestHistoryFingerprint(alias);
+  await client.sendMessage({ alias, messageText });
+  const outcome = await client.waitForReply({
+    alias,
+    timeoutMs: 180_000,
+    afterFingerprint: before,
+    sentMessageText: messageText,
+  });
+
+  if (outcome.timedOut) {
+    const error = new Error(
+      "The Mind did not reply before the three-minute timeout. Check history before retrying.",
+    );
+    error.name = "MindsTimeoutError";
+    throw error;
+  }
+
+  return {
+    reply: {
+      messageText: outcome.reply.messageText ?? "",
+      createdAt: outcome.reply.createdAt ?? null,
+    },
+  };
 }
 
 export async function runMindsPoc(input: {
