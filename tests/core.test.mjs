@@ -33,7 +33,7 @@ test("keeps conversation evidence behind the public API boundary", async () => {
     readFile(new URL("../lib/minds.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/cron/due-cases/route.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(routeSource, /\["seed", "review"\]/);
+  assert.match(routeSource, /\["seed", "review", "revise"\]/);
   assert.match(routeSource, /pollMindsPoc/);
   assert.doesNotMatch(routeSource, /"history"/);
   assert.doesNotMatch(mindsSource, /return \{ alias, history/);
@@ -100,6 +100,19 @@ test("requires explicit creator identity and canon authority before seeding", ()
   assert.match(message, /Creator-world identity:/);
   assert.match(message, /Canon authority and source:/);
   assert.match(message, /durable creator context/);
+});
+
+test("requires a concrete revision before the approval review", () => {
+  assert.throws(
+    () => buildMindsMessage({ action: "revise" }),
+    /revised submission/i,
+  );
+  const message = buildMindsMessage({
+    action: "revise",
+    revision: "The vessel now waits until sunrise before crossing the sea.",
+  });
+  assert.match(message, /remembered submission, canon rule, and prior decision/i);
+  assert.match(message, /Revised community submission:/i);
 });
 
 test("correlates replies by message time instead of fingerprint ordering", () => {

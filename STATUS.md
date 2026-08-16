@@ -29,6 +29,7 @@
 - Five contract tests cover authority, duplicate prevention, digest validation, creator isolation, and tamper detection.
 - The wallet approval interface handles disconnected wallet, wrong network, rejected signature, pending, failed, and confirmed states.
 - A Base Sepolia-only deployment page is ready and waits for an explicit wallet signature.
+- Session C continues the same case with a revised contribution before the receipt approval gate appears.
 
 ## In Progress
 

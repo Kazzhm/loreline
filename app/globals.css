@@ -43,7 +43,7 @@ nav a:hover { color: var(--coral); }
 .console-grid { border: 1px solid rgba(255, 255, 255, 0.14); display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); margin: 0 auto; max-width: 1280px; }
 .work-panel, .trace-panel { min-height: 580px; padding: 34px; }
 .work-panel { border-right: 1px solid rgba(255, 255, 255, 0.14); }
-.mode-tabs { border-bottom: 1px solid rgba(255, 255, 255, 0.14); display: grid; grid-template-columns: 1fr 1fr; margin: -4px 0 30px; }
+.mode-tabs { border-bottom: 1px solid rgba(255, 255, 255, 0.14); display: grid; grid-template-columns: repeat(3, 1fr); margin: -4px 0 30px; }
 .mode-tabs button { background: transparent; border: 0; color: #8f9189; padding: 10px 0 16px; text-align: left; }
 .mode-tabs button.active { box-shadow: inset 0 -2px var(--coral); color: #fff; }
 .mode-tabs b, .mode-tabs span { display: block; }

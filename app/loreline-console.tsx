@@ -32,7 +32,7 @@ function delay(milliseconds: number) {
 
 export default function LorelineConsole() {
   const [status, setStatus] = useState<MindStatus>({ state: "checking" });
-  const [mode, setMode] = useState<"seed" | "review">("seed");
+  const [mode, setMode] = useState<"seed" | "review" | "revise">("seed");
   const [creatorId, setCreatorId] = useState("glass-sea-studio");
   const [worldContext, setWorldContext] = useState(
     "The Glass Sea is an original fantasy setting managed by Glass Sea Studio. Loreline is its designated canon and community-review steward.",
@@ -45,6 +45,9 @@ export default function LorelineConsole() {
   );
   const [submission, setSubmission] = useState(
     "A fan proposes a courier who crosses the Glass Sea at midnight by sailing without a lantern.",
+  );
+  const [revision, setRevision] = useState(
+    "The fan revises the courier route: the vessel waits outside the harbor and crosses only after sunrise, when the night restriction has ended.",
   );
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<PocResult | null>(null);
@@ -108,6 +111,7 @@ export default function LorelineConsole() {
           canonSource,
           canonRule,
           submission,
+          revision,
         }),
       });
       const startBody = (await startResponse.json()) as PocResult;
@@ -194,7 +198,7 @@ export default function LorelineConsole() {
         <div className="console-heading">
           <div>
             <p className="section-kicker">Live workflow</p>
-            <h2>Review one contribution across two sessions</h2>
+            <h2>Review one contribution across three sessions</h2>
           </div>
           <p className="run-state">
             {canRun
@@ -213,6 +217,7 @@ export default function LorelineConsole() {
                 onClick={() => {
                   setMode("seed");
                   setResult(null);
+                  setRunPhase("idle");
                 }}
               >
                 <b>Session A</b>
@@ -225,10 +230,24 @@ export default function LorelineConsole() {
                 onClick={() => {
                   setMode("review");
                   setResult(null);
+                  setRunPhase("idle");
                 }}
               >
                 <b>Session B</b>
                 <span>Recall &amp; review</span>
+              </button>
+              <button
+                type="button"
+                className={mode === "revise" ? "active" : ""}
+                disabled={pending}
+                onClick={() => {
+                  setMode("revise");
+                  setResult(null);
+                  setRunPhase("idle");
+                }}
+              >
+                <b>Session C</b>
+                <span>Revise &amp; approve</span>
               </button>
             </div>
 
@@ -267,12 +286,21 @@ export default function LorelineConsole() {
                   />
                 </label>
               </>
-            ) : (
+            ) : mode === "review" ? (
               <label>
                 New community submission
                 <textarea
                   value={submission}
                   onChange={(event) => setSubmission(event.target.value)}
+                  rows={5}
+                />
+              </label>
+            ) : (
+              <label>
+                Revised community submission
+                <textarea
+                  value={revision}
+                  onChange={(event) => setRevision(event.target.value)}
                   rows={5}
                 />
               </label>
@@ -285,7 +313,9 @@ export default function LorelineConsole() {
                   : "Mind working · checking result…"
                 : mode === "seed"
                   ? "Store canon in Session A"
-                  : "Review from remembered context"}
+                  : mode === "review"
+                    ? "Review from remembered context"
+                    : "Review the revision in Session C"}
             </button>
 
             {!canRun && (
@@ -326,14 +356,14 @@ export default function LorelineConsole() {
                 <span className="empty-orbit" aria-hidden="true" />
                 <p>The trace fills only after a real Mind reply.</p>
                 <small>
-                  Session B deliberately omits the canon rule so recall can be
-                  evaluated.
+                  Sessions B and C deliberately omit the canon rule so recall
+                  and precedent can be evaluated.
                 </small>
               </div>
             )}
 
-            {mode === "review" && result?.reply ? (
-              <ReceiptPanel submission={submission} />
+            {mode === "revise" && result?.reply ? (
+              <ReceiptPanel submission={revision} />
             ) : null}
 
             <ol className="trace-list">

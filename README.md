@@ -28,9 +28,10 @@ Removing Minds collapses the core experience: Loreline would become a one-off ch
 2. Loreline stores the rule through a persistent Mind conversation.
 3. A later session introduces a community submission.
 4. The Mind recalls the earlier rule and explains the relevant precedent.
-5. Loreline prepares a decision and, when required, a follow-up.
-6. After creator approval, the system produces a portable contribution receipt.
-7. The decision becomes context for the next submission.
+5. A third session reviews the contributor's revision against the remembered issue.
+6. Loreline prepares a decision and, when required, a follow-up.
+7. After creator approval, the system produces a portable contribution receipt.
+8. The decision becomes context for the next submission.
 
 ## Architecture
 

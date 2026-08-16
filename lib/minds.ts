@@ -11,7 +11,7 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 
-export type PocAction = "seed" | "review";
+export type PocAction = "seed" | "review" | "revise";
 
 const JOB_TOKEN_TTL_MS = 10 * 60 * 1_000;
 const REQUEST_ID_PATTERN = /^[a-zA-Z0-9_-]{16,80}$/;
@@ -204,6 +204,7 @@ export async function startMindsPoc(input: {
   canonSource?: string;
   canonRule?: string;
   submission?: string;
+  revision?: string;
 }) {
   const config = readConfig();
   const alias = conversationAlias(input.creatorId);
@@ -402,6 +403,7 @@ export function buildMindsMessage(input: {
   canonSource?: string;
   canonRule?: string;
   submission?: string;
+  revision?: string;
 }) {
   if (input.action === "seed") {
     const worldContext = input.worldContext?.trim();
@@ -426,14 +428,26 @@ export function buildMindsMessage(input: {
     ].join("\n");
   }
 
-  const submission = input.submission?.trim();
-  if (!submission || submission.length < 12) {
-    throw new TypeError("Submission must be at least 12 characters.");
+  if (input.action === "review") {
+    const submission = input.submission?.trim();
+    if (!submission || submission.length < 12) {
+      throw new TypeError("Submission must be at least 12 characters.");
+    }
+    return [
+      "Continue the existing creator-world review without asking me to restate prior canon.",
+      `New community submission: ${submission}`,
+      "Identify any remembered canon rule or precedent that matters. Return: recalled context, decision, one reason, and next action.",
+    ].join("\n");
+  }
+
+  const revision = input.revision?.trim();
+  if (!revision || revision.length < 12) {
+    throw new TypeError("Revised submission must be at least 12 characters.");
   }
   return [
-    "Continue the existing creator-world review without asking me to restate prior canon.",
-    `New community submission: ${submission}`,
-    "Identify any remembered canon rule or precedent that matters. Return: recalled context, decision, one reason, and next action.",
+    "Continue the open community case using its remembered submission, canon rule, and prior decision.",
+    `Revised community submission: ${revision}`,
+    "Decide whether this revision now satisfies the creator's standing canon. Return: recalled rule, prior issue, new decision, one reason, and next action.",
   ].join("\n");
 }
 

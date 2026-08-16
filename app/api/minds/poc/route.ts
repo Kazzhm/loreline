@@ -25,8 +25,8 @@ export async function POST(request: Request) {
     }
 
     const action = body.action as PocAction;
-    if (!(["seed", "review"] as const).includes(action)) {
-      throw new TypeError("Action must be seed or review.");
+    if (!(["seed", "review", "revise"] as const).includes(action)) {
+      throw new TypeError("Action must be seed, review, or revise.");
     }
 
     const result = await startMindsPoc({
@@ -41,6 +41,8 @@ export async function POST(request: Request) {
         typeof body.canonRule === "string" ? body.canonRule : undefined,
       submission:
         typeof body.submission === "string" ? body.submission : undefined,
+      revision:
+        typeof body.revision === "string" ? body.revision : undefined,
     });
 
     return NextResponse.json(
