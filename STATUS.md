@@ -18,28 +18,31 @@
 - Independent history retrieval returned the complete four-record conversation.
 - A fresh conversation with no prior history recalled the stored world and both canon constraints.
 - Durable creator context is now verified separately from conversation continuity.
+- Reply correlation now uses the exact sent message and timestamps instead of fingerprint ordering.
+- Public API no longer exposes conversation aliases, fingerprints, or history.
 
 ## In Progress
 
-- Due-case Skill design and autonomy evidence.
-- Asynchronous reply recovery for high-latency runs.
+- Due-case autonomy evidence.
+- Asynchronous progress UX for high-latency runs.
 - Test-network contribution receipt.
 
 ## Broken
 
-- Autonomy proof: `NOT WORKING YET` until a real Mind and due-case Skill are configured.
+- Autonomy proof: `NOT WORKING YET`; the scheduled proof did not produce a verified follow-up.
 - Test-network rights receipt: not started; intentionally behind Minds P0.
 
 ## Risks
 
 - Official BUIDL list is private, so competitor coverage is incomplete.
 - Public documentation does not expose a general scheduling endpoint.
+- Reliable due-time wake behavior remains unverified.
 - Wallet metadata is available, but Builder API wallet signing is not documented.
 - A production reply completed close to the three-minute route timeout.
 - Only 12 calendar days remained at rule verification.
 
 ## Next
 
-1. Build autonomous due-case Skill.
-2. Add timeout recovery and duplicate-action tests.
+1. Revise the due trigger and rerun autonomy proof.
+2. Add asynchronous progress and duplicate-action tests.
 3. Add test-network contribution receipt only after autonomy works.
