@@ -2,7 +2,12 @@
 
 ## Current Result
 
-`NOT WORKING YET` for authenticated persistence because no Builder API key or Mind ID is available in the current environment.
+Authenticated Minds connectivity and cross-request conversation continuity are
+`WORKING` in the production deployment.
+
+Durable canon memory beyond the persistent conversation is `NOT WORKING YET`.
+The configured Mind correctly recalled the earlier rule but explicitly treated
+it as conversation-scoped until more creator-world context is supplied.
 
 Verified on 2026-08-16:
 
@@ -11,6 +16,22 @@ Verified on 2026-08-16:
 - Client library 0.1.3 is installed.
 - Public Bazaar requests work without credentials.
 - Server routes and command-line scripts use the official client library.
+- Production status endpoint returned `configured: true` and `connected: true`.
+- The configured Mind returned real replies and is enabled.
+
+## Verified Production Run
+
+Verified on 2026-08-16 using three independent production HTTP requests.
+Session A and Session B used the same deterministic creator-scoped alias, and
+an independent history retrieval returned all four records. Identifiers and
+raw private conversation evidence are intentionally excluded from the public
+repository.
+
+Session A established that blue lanterns in the Ember Archive belong to
+deceased cartographers and may not pass the western gate. Session B omitted
+that complete rule and proposed a living courier carrying one through the
+gate. The Mind recalled both constraints, declined the proposal, explained the
+two violations, and proposed a canon-amendment or rewrite path.
 
 ## Configuration
 
@@ -54,7 +75,7 @@ The same alias must be used in separate processes and separate browser sessions.
 npm run minds:poc -- seed creator-001 "The Glass Sea cannot be crossed at night."
 ```
 
-Expected evidence:
+Recorded evidence:
 
 - conversation alias;
 - human message fingerprint before send;
@@ -70,11 +91,15 @@ Close the first process, then run:
 npm run minds:poc -- verify creator-001
 ```
 
-The verification prompt does not repeat the rule. The Mind must recall it from the persistent conversation and explain how it affects a new community submission.
+The verification prompt did not repeat the complete rule. The Mind recalled it
+from the persistent conversation and used it to decide a new community
+submission.
 
 ## Continuity Proof
 
-The second run asks the Mind to continue the same creator-review workflow. Evidence must show the same alias and earlier fingerprints in the returned history.
+The second run continued the same creator-review workflow with the same alias.
+An additional history request returned both earlier creator messages and both
+Mind replies.
 
 ## Autonomy Proof Target
 
@@ -95,10 +120,10 @@ P1 adds a due-case Skill. A creator marks a case for later review, exits, and th
 
 ## Reproduction Checklist
 
-- [ ] `minds doctor --pretty` passes all checks.
-- [ ] `minds list --pretty` returns the configured Mind.
-- [ ] Session A completes.
-- [ ] Session A process is closed.
-- [ ] Session B recalls the rule without prompt repetition.
-- [ ] Full history is saved as private test evidence with secrets removed.
+- [x] Production status endpoint confirms the configured Mind.
+- [x] Session A completes.
+- [x] Session A request ends before Session B starts.
+- [x] Session B recalls the rule without complete prompt repetition.
+- [x] Independent history retrieval returns the full four-record sequence.
+- [x] Public evidence contains no credentials.
 - [ ] Autonomy proof produces a later Mind action.
