@@ -94,7 +94,7 @@ Tests cover the rendered product shell. Minds network tests require real credent
 ## Security
 
 - Builder credentials stay server-side.
-- Public routes never return credentials.
+- Public routes never return credentials, conversation aliases, message fingerprints, or history.
 - Stable aliases are normalized before use.
 - The product uses explicit approval gates before rights or publication actions.
 - Production actions must be idempotent and auditable.
