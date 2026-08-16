@@ -49,6 +49,7 @@ MINDS_BUILDER_API_KEY=
 MINDS_MIND_ID=
 MINDS_CONVERSATION_PREFIX=loreline
 CRON_SECRET=
+NEXT_PUBLIC_RECEIPT_CONTRACT_ADDRESS=
 ```
 
 The Builder API key is created in the Minds Builder Console and is sent only from server routes.
@@ -69,6 +70,7 @@ add these production environment variables before the authenticated demo run:
 - `MINDS_MIND_ID` — the UUID of the configured Mind.
 - `MINDS_CONVERSATION_PREFIX` — use `loreline`.
 - `CRON_SECRET` — a random secret used only to authenticate the daily due-work trigger.
+- `NEXT_PUBLIC_RECEIPT_CONTRACT_ADDRESS` — the public Base Sepolia registry address after test-network deployment.
 
 Redeploy after changing any environment variable. The site deliberately reports
 that setup is required until both required Minds values are available to its
@@ -105,6 +107,8 @@ The receipt contract uses a pinned local Solidity compiler so contract tests do 
 - Result tokens are encrypted, expire after ten minutes, and never expose conversation identifiers.
 - Public routes never return credentials, conversation aliases, message fingerprints, or history.
 - The due-work route rejects requests without the configured bearer secret.
+- Receipt issuance requires an explicit creator checkbox, a wallet signature on Base Sepolia, and a confirmed transaction.
+- Raw contribution and agreement text never goes on-chain; only their Keccak-256 digests are recorded.
 - Stable aliases are normalized before use.
 - The product uses explicit approval gates before rights or publication actions.
 - Production actions must be idempotent and auditable.

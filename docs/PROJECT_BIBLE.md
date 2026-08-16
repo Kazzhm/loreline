@@ -88,7 +88,7 @@ External-service credentials remain in the Minds connection layer. Application c
 
 ### Blockchain
 
-An EVM-compatible test network is preferred for the first receipt because viem and Solidity testing are mature and the contract can remain small. Final network selection follows available test funding and event relevance.
+Base Sepolia is selected for the first receipt. It is EVM-compatible, supported by viem, inexpensive for test transactions, and independently verifiable through BaseScan. No mainnet transaction is permitted for the hackathon proof.
 
 ### Contract
 
@@ -152,7 +152,7 @@ P0 can hold workflow state in a minimal durable store once the hosting database 
 
 ### Blockchain
 
-Solidity receipt contract with local automated tests, followed by test-network deployment only.
+Solidity receipt contract with local automated tests and a creator wallet approval gate, followed by Base Sepolia deployment only.
 
 ### External APIs
 

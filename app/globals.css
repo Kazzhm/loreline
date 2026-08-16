@@ -64,6 +64,21 @@ input:focus, textarea:focus { border-color: var(--coral); }
 .result-card { align-items: flex-start; text-align: left; }
 .result-card strong { font-family: Georgia, serif; font-size: 19px; font-weight: 400; line-height: 1.55; }
 .error-card strong { color: #ff9d86; }
+.receipt-panel { border-bottom: 1px solid rgba(255, 255, 255, 0.14); padding: 24px 0; }
+.receipt-heading { align-items: start; display: flex; justify-content: space-between; margin-bottom: 20px; }
+.receipt-heading p { color: #8f9189; font-size: 10px; letter-spacing: 0.08em; margin: 0 0 6px; text-transform: uppercase; }
+.receipt-heading h3 { font-family: Georgia, serif; font-size: 22px; font-weight: 400; margin: 0; }
+.receipt-heading > span { border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 999px; color: var(--mint); font-size: 10px; padding: 7px 10px; }
+.receipt-panel label { margin-bottom: 15px; }
+.approval-check { align-items: start; display: grid; gap: 10px; grid-template-columns: 17px 1fr; line-height: 1.5; }
+.approval-check input { height: 16px; margin: 1px 0 0; padding: 0; width: 16px; }
+.receipt-state { border-left: 2px solid var(--mint); color: #d8d9d2; font-size: 12px; line-height: 1.5; margin: 12px 0; padding: 10px 12px; }
+.receipt-state b, .receipt-state span, .receipt-state a { display: block; }
+.receipt-state a { color: var(--mint); margin-top: 6px; text-decoration: underline; }
+.receipt-state.failed { border-color: var(--coral); color: #ff9d86; }
+.receipt-state.pending-setup { border-color: #77796f; color: #a7a89f; }
+.receipt-action { background: transparent; border: 1px solid var(--mint); color: var(--mint); font-size: 12px; font-weight: 700; padding: 13px 16px; width: 100%; }
+.receipt-action:disabled { border-color: #67685f; color: #77796f; }
 .trace-list { list-style: none; margin: 0; padding: 18px 0 0; }
 .trace-list li { align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: grid; gap: 18px; grid-template-columns: 30px 1fr; padding: 14px 0; }
 .trace-list > li > span { color: var(--coral); font-family: Georgia, serif; font-size: 13px; }

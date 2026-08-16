@@ -27,12 +27,12 @@
 - `CRON_SECRET` is loaded in production without exposing its value.
 - The contribution receipt contract compiles locally with a pinned Solidity compiler.
 - Five contract tests cover authority, duplicate prevention, digest validation, creator isolation, and tamper detection.
+- The wallet approval interface handles disconnected wallet, wrong network, rejected signature, pending, failed, and confirmed states.
 
 ## In Progress
 
 - Due-case autonomy evidence.
 - First scheduled-trigger execution and reply observation.
-- Wallet-facing creator approval flow.
 - Test-network contribution receipt deployment.
 
 ## Broken

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import ReceiptPanel from "./receipt-panel";
 
 type MindStatus =
   | { state: "checking" }
@@ -330,6 +331,10 @@ export default function LorelineConsole() {
                 </small>
               </div>
             )}
+
+            {mode === "review" && result?.reply ? (
+              <ReceiptPanel submission={submission} />
+            ) : null}
 
             <ol className="trace-list">
               {STEPS.map(([title, detail], index) => (

@@ -12,15 +12,19 @@ import {
   publicMindsError,
   startMindsPoc,
 } from "../lib/minds.ts";
+import { prepareReceiptDigests } from "../lib/receipt.ts";
 
 test("contains the Loreline product shell and metadata", async () => {
-  const [layout, consoleSource] = await Promise.all([
+  const [layout, consoleSource, receiptSource] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/loreline-console.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/receipt-panel.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(layout, /title:\s*"Loreline"/);
   assert.match(consoleSource, /Creator canon.*that remembers/is);
   assert.match(consoleSource, /Mind activity trace/i);
+  assert.match(receiptSource, /Creator approval gate/i);
+  assert.match(receiptSource, /does not\s+transfer copyright/i);
 });
 
 test("keeps conversation evidence behind the public API boundary", async () => {
@@ -187,4 +191,19 @@ test("reports a product-owned trigger and its correlated reply separately", () =
 
   assert.equal(outcome.trigger?.messageText, triggerText);
   assert.equal(outcome.reply?.messageText, "No cases were due.");
+});
+
+test("creates deterministic receipt digests without storing raw content", () => {
+  const first = prepareReceiptDigests(
+    "  A fan-designed lantern keeper.  ",
+    "Approved with contributor attribution and no copyright transfer.\r\n",
+  );
+  const second = prepareReceiptDigests(
+    "A fan-designed lantern keeper.",
+    "Approved with contributor attribution and no copyright transfer.\n",
+  );
+
+  assert.deepEqual(first, second);
+  assert.match(first.contentDigest, /^0x[0-9a-f]{64}$/);
+  assert.notEqual(first.contentDigest, first.agreementDigest);
 });
