@@ -19,6 +19,10 @@ export async function POST(request: Request) {
     const result = await runMindsPoc({
       action,
       creatorId: String(body.creatorId ?? ""),
+      worldContext:
+        typeof body.worldContext === "string" ? body.worldContext : undefined,
+      canonSource:
+        typeof body.canonSource === "string" ? body.canonSource : undefined,
       canonRule:
         typeof body.canonRule === "string" ? body.canonRule : undefined,
       submission:
