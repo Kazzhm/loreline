@@ -292,8 +292,14 @@ export function hasAutonomousFollowUp(rows: MessageRecord[]) {
 
 export async function getAutonomyStatus() {
   const builderApiKey = process.env.MINDS_BUILDER_API_KEY?.trim();
+  const reliabilityTriggerConfigured = Boolean(process.env.CRON_SECRET?.trim());
   if (!builderApiKey || !process.env.MINDS_MIND_ID?.trim()) {
-    return { configured: false, verified: false, observedAt: null } as const;
+    return {
+      configured: false,
+      verified: false,
+      observedAt: null,
+      reliabilityTriggerConfigured,
+    } as const;
   }
 
   const client = createMindsClient({ builderApiKey });
@@ -306,6 +312,7 @@ export async function getAutonomyStatus() {
     configured: true,
     verified: Boolean(followUp),
     observedAt: followUp?.createdAt ?? null,
+    reliabilityTriggerConfigured,
   } as const;
 }
 

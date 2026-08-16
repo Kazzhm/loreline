@@ -12,7 +12,12 @@ export async function GET() {
   } catch (error) {
     const result = publicMindsError(error);
     return NextResponse.json(
-      { configured: true, verified: false, observedAt: null },
+      {
+        configured: true,
+        verified: false,
+        observedAt: null,
+        reliabilityTriggerConfigured: Boolean(process.env.CRON_SECRET?.trim()),
+      },
       { status: result.status, headers: { "cache-control": "no-store" } },
     );
   }

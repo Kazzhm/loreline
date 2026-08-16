@@ -34,6 +34,7 @@ test("keeps conversation evidence behind the public API boundary", async () => {
   assert.doesNotMatch(mindsSource, /return \{ alias, history/);
   assert.doesNotMatch(mindsSource, /fingerprint: outcome\.reply\.fingerprint/);
   assert.match(cronSource, /isAuthorizedCron/);
+  assert.match(mindsSource, /reliabilityTriggerConfigured/);
 });
 
 test("reports missing Minds configuration without inventing a result", async () => {
