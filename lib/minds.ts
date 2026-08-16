@@ -89,6 +89,8 @@ export async function getMindsStatus() {
 export async function runMindsPoc(input: {
   action: PocAction;
   creatorId: string;
+  worldContext?: string;
+  canonSource?: string;
   canonRule?: string;
   submission?: string;
 }) {
@@ -103,7 +105,7 @@ export async function runMindsPoc(input: {
     return { alias, history: publicHistory(history) };
   }
 
-  const messageText = buildMessage(input);
+  const messageText = buildMindsMessage(input);
   const before = await client.getLatestHistoryFingerprint(alias);
   await client.sendMessage({ alias, messageText });
 
@@ -135,20 +137,33 @@ export async function runMindsPoc(input: {
   };
 }
 
-function buildMessage(input: {
+export function buildMindsMessage(input: {
   action: PocAction;
+  worldContext?: string;
+  canonSource?: string;
   canonRule?: string;
   submission?: string;
 }) {
   if (input.action === "seed") {
+    const worldContext = input.worldContext?.trim();
+    const canonSource = input.canonSource?.trim();
     const canonRule = input.canonRule?.trim();
+    if (!worldContext || worldContext.length < 24) {
+      throw new TypeError("Creator-world identity must be at least 24 characters.");
+    }
+    if (!canonSource || canonSource.length < 8) {
+      throw new TypeError("Canon authority must be at least 8 characters.");
+    }
     if (!canonRule || canonRule.length < 12) {
       throw new TypeError("Canon rule must be at least 12 characters.");
     }
     return [
-      "Store this as a standing canon rule for this creator world.",
-      `Rule: ${canonRule}`,
-      "Acknowledge the rule, explain its practical boundary in one sentence, and preserve it for future community reviews.",
+      `Creator-world identity: ${worldContext}`,
+      `Canon authority and source: ${canonSource}`,
+      "This persistent conversation is the creator-approved working canon register for this project.",
+      `Standing canon rule: ${canonRule}`,
+      "Preserve the identity, authority, and rule as durable creator context and apply them in future community reviews under this creator relationship.",
+      "Confirm the stored context, its authority, the practical boundary, and how you will use it in a later review.",
     ].join("\n");
   }
 
