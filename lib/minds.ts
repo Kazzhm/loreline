@@ -1,6 +1,7 @@
 import {
   createMindsClient,
   MindsApiError,
+  type MindsClient,
   type MessageRecord,
 } from "@animocabrands/minds-client-lib";
 
@@ -56,6 +57,60 @@ function publicHistory(rows: MessageRecord[]) {
     messageText: row.messageText ?? "",
     createdAt: row.createdAt ?? null,
   }));
+}
+
+export function findReplyAfterMessage(
+  rows: MessageRecord[],
+  sentMessageText: string,
+  requestStartedAt: number,
+) {
+  const sentRows = rows.filter((row) => {
+    const createdAt = Date.parse(row.createdAt ?? "");
+    return row.senderType === 1
+      && row.messageText?.trim() === sentMessageText.trim()
+      && Number.isFinite(createdAt)
+      && createdAt >= requestStartedAt - 5_000;
+  });
+  const sentRow = sentRows.sort(
+    (a, b) => Date.parse(b.createdAt ?? "") - Date.parse(a.createdAt ?? ""),
+  )[0];
+  if (!sentRow?.createdAt) return undefined;
+
+  const sentAt = Date.parse(sentRow.createdAt);
+  return rows
+    .filter((row) => {
+      const createdAt = Date.parse(row.createdAt ?? "");
+      return row.senderType !== 1
+        && Boolean(row.messageText?.trim())
+        && Number.isFinite(createdAt)
+        && createdAt > sentAt;
+    })
+    .sort(
+      (a, b) => Date.parse(a.createdAt ?? "") - Date.parse(b.createdAt ?? ""),
+    )[0];
+}
+
+async function sendAndWaitForVerifiedReply(
+  client: MindsClient,
+  alias: string,
+  messageText: string,
+) {
+  const requestStartedAt = Date.now();
+  await client.sendMessage({ alias, messageText });
+  const deadline = requestStartedAt + 270_000;
+
+  while (Date.now() < deadline) {
+    const history = await client.getHistory(alias, { limit: 100 });
+    const reply = findReplyAfterMessage(history, messageText, requestStartedAt);
+    if (reply) return { reply, history };
+    await new Promise((resolve) => setTimeout(resolve, 4_000));
+  }
+
+  const error = new Error(
+    "The Mind did not produce a verifiable reply before the timeout. Check history before retrying.",
+  );
+  error.name = "MindsTimeoutError";
+  throw error;
 }
 
 export async function getMindsStatus() {
@@ -141,22 +196,7 @@ export async function runMindsOperatorAction(action: OperatorAction) {
   };
 
   const messageText = messages[action];
-  const before = await client.getLatestHistoryFingerprint(alias);
-  await client.sendMessage({ alias, messageText });
-  const outcome = await client.waitForReply({
-    alias,
-    timeoutMs: 180_000,
-    afterFingerprint: before,
-    sentMessageText: messageText,
-  });
-
-  if (outcome.timedOut) {
-    const error = new Error(
-      "The Mind did not reply before the three-minute timeout. Check history before retrying.",
-    );
-    error.name = "MindsTimeoutError";
-    throw error;
-  }
+  const outcome = await sendAndWaitForVerifiedReply(client, alias, messageText);
 
   return {
     reply: {
@@ -186,25 +226,7 @@ export async function runMindsPoc(input: {
   }
 
   const messageText = buildMindsMessage(input);
-  const before = await client.getLatestHistoryFingerprint(alias);
-  await client.sendMessage({ alias, messageText });
-
-  const outcome = await client.waitForReply({
-    alias,
-    timeoutMs: 180_000,
-    afterFingerprint: before,
-    sentMessageText: messageText,
-  });
-
-  if (outcome.timedOut) {
-    const error = new Error(
-      "The Mind did not reply before the three-minute timeout. Check history before retrying.",
-    );
-    error.name = "MindsTimeoutError";
-    throw error;
-  }
-
-  const history = await client.getHistory(alias, { limit: 100 });
+  const outcome = await sendAndWaitForVerifiedReply(client, alias, messageText);
 
   return {
     alias,
@@ -213,7 +235,7 @@ export async function runMindsPoc(input: {
       messageText: outcome.reply.messageText ?? "",
       createdAt: outcome.reply.createdAt ?? null,
     },
-    history: publicHistory(history),
+    history: publicHistory(outcome.history),
   };
 }
 
