@@ -207,3 +207,15 @@ test("creates deterministic receipt digests without storing raw content", () => 
   assert.match(first.contentDigest, /^0x[0-9a-f]{64}$/);
   assert.notEqual(first.contentDigest, first.agreementDigest);
 });
+
+test("locks registry deployment to Base Sepolia wallet approval", async () => {
+  const [deploymentSource, bytecodeSource] = await Promise.all([
+    readFile(new URL("../lib/receipt-deployment.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/receipt-bytecode.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(deploymentSource, /baseSepolia/);
+  assert.match(deploymentSource, /awaiting_signature/);
+  assert.match(deploymentSource, /waitForTransactionReceipt/);
+  assert.match(bytecodeSource, /0x[0-9a-f]{100,}/);
+});

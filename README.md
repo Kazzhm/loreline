@@ -101,6 +101,8 @@ npm run test:contracts
 
 The receipt contract uses a pinned local Solidity compiler so contract tests do not depend on a compiler download at runtime.
 
+The operator-only setup flow at `/setup/receipt` deploys the compiled registry bytecode to Base Sepolia through an injected EVM wallet. It is hard-coded to the test network and requires an explicit wallet confirmation.
+
 ## Security
 
 - Builder credentials stay server-side.
