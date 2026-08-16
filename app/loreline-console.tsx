@@ -34,6 +34,12 @@ export default function LorelineConsole() {
   const [status, setStatus] = useState<MindStatus>({ state: "checking" });
   const [mode, setMode] = useState<"seed" | "review">("seed");
   const [creatorId, setCreatorId] = useState("glass-sea-studio");
+  const [worldContext, setWorldContext] = useState(
+    "The Glass Sea is an original fantasy setting managed by Glass Sea Studio. Loreline is its designated canon and community-review steward.",
+  );
+  const [canonSource, setCanonSource] = useState(
+    "Creator-approved Loreline canon register",
+  );
   const [canonRule, setCanonRule] = useState(
     "The Glass Sea cannot be crossed at night; moonlight turns every vessel back toward its port of origin.",
   );
@@ -94,6 +100,8 @@ export default function LorelineConsole() {
         body: JSON.stringify({
           action: mode,
           creatorId,
+          worldContext,
+          canonSource,
           canonRule,
           submission,
         }),
@@ -185,7 +193,7 @@ export default function LorelineConsole() {
             </div>
 
             <label>
-              Creator world
+              Creator world ID
               <input
                 value={creatorId}
                 onChange={(event) => setCreatorId(event.target.value)}
@@ -194,14 +202,31 @@ export default function LorelineConsole() {
             </label>
 
             {mode === "seed" ? (
-              <label>
-                Standing canon rule
-                <textarea
-                  value={canonRule}
-                  onChange={(event) => setCanonRule(event.target.value)}
-                  rows={5}
-                />
-              </label>
+              <>
+                <label>
+                  Creator-world identity
+                  <textarea
+                    value={worldContext}
+                    onChange={(event) => setWorldContext(event.target.value)}
+                    rows={3}
+                  />
+                </label>
+                <label>
+                  Canon authority
+                  <input
+                    value={canonSource}
+                    onChange={(event) => setCanonSource(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Standing canon rule
+                  <textarea
+                    value={canonRule}
+                    onChange={(event) => setCanonRule(event.target.value)}
+                    rows={5}
+                  />
+                </label>
+              </>
             ) : (
               <label>
                 New community submission
