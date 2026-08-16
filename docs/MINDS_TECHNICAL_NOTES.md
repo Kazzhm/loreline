@@ -18,13 +18,21 @@ The product distinction is continuity rather than a single response. A stable Mi
 - `getLatestHistoryFingerprint` and `waitForReply` prevent confusing an old reply with the current one.
 - `waitForReply` listens to the live event stream first and polls history as a fallback.
 
+### Reply Correlation Finding
+
+In a verified high-latency run, client library 0.1.3 accepted an older Mind reply
+when message fingerprints were compared lexicographically. Loreline treats
+fingerprints as opaque identifiers. It correlates a reply by locating the exact
+sent human message in history and requiring the Mind reply timestamp to be
+later. A regression test preserves this boundary.
+
 Persistent memory implementation details, retention periods, and deletion semantics are not fully documented on the public Builder pages and remain `UNVERIFIED`.
 
 ## Autonomy
 
 Minds consume cognition when reasoning, using tools, and carrying out autonomous tasks, not only when replying to messages. The platform documentation describes monitoring, proactive outreach, and multi-step work. The public Builder API exposes status, messages, history, events, skills, apps, and usage data, but no general-purpose scheduling route is documented.
 
-For Loreline, autonomous follow-up must therefore be demonstrated through an equipped Skill or product-owned due-work trigger that asks the persistent Mind to evaluate the stored case. A mere timer that displays a canned result is not acceptable.
+For Loreline, autonomous follow-up must therefore be demonstrated through an equipped Skill or product-owned due-work trigger that asks the persistent Mind to evaluate the stored case. A mere timer that displays a canned result is not acceptable. A verified calendar event was stored but did not wake a cognition cycle at its due time, so calendar creation alone is not accepted as autonomy evidence.
 
 ## Identity and Wallet Capability
 
