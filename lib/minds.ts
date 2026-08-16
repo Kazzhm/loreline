@@ -1,11 +1,28 @@
 import {
   createMindsClient,
   MindsApiError,
-  type MindsClient,
   type MessageRecord,
 } from "@animocabrands/minds-client-lib";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+  timingSafeEqual,
+} from "node:crypto";
 
 export type PocAction = "seed" | "review";
+
+const JOB_TOKEN_TTL_MS = 10 * 60 * 1_000;
+const REQUEST_ID_PATTERN = /^[a-zA-Z0-9_-]{16,80}$/;
+
+type JobTokenPayload = {
+  version: 1;
+  alias: string;
+  messageText: string;
+  requestStartedAt: number;
+  expiresAt: number;
+};
 
 export class MindsSetupError extends Error {
   constructor(message: string) {
@@ -24,6 +41,66 @@ function readConfig() {
   }
 
   return { builderApiKey, mindId };
+}
+
+function tokenKey(builderApiKey: string) {
+  return createHash("sha256")
+    .update("loreline:minds-job-token:v1\0")
+    .update(builderApiKey)
+    .digest();
+}
+
+function sealJobToken(payload: JobTokenPayload, builderApiKey: string) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", tokenKey(builderApiKey), iv);
+  const ciphertext = Buffer.concat([
+    cipher.update(JSON.stringify(payload), "utf8"),
+    cipher.final(),
+  ]);
+  const tag = cipher.getAuthTag();
+  return [iv, tag, ciphertext].map((part) => part.toString("base64url")).join(".");
+}
+
+function openJobToken(token: string, builderApiKey: string) {
+  const parts = token.split(".");
+  if (parts.length !== 3) throw new TypeError("Job token is invalid.");
+
+  try {
+    const [iv, tag, ciphertext] = parts.map((part) =>
+      Buffer.from(part, "base64url"),
+    );
+    const decipher = createDecipheriv(
+      "aes-256-gcm",
+      tokenKey(builderApiKey),
+      iv,
+    );
+    decipher.setAuthTag(tag);
+    const payload = JSON.parse(
+      Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString(
+        "utf8",
+      ),
+    ) as JobTokenPayload;
+    if (
+      payload.version !== 1 ||
+      typeof payload.alias !== "string" ||
+      typeof payload.messageText !== "string" ||
+      !Number.isFinite(payload.requestStartedAt) ||
+      !Number.isFinite(payload.expiresAt)
+    ) {
+      throw new Error("invalid payload");
+    }
+    if (Date.now() > payload.expiresAt) {
+      const error = new Error("The result window expired. Start a new run.");
+      error.name = "MindsJobExpiredError";
+      throw error;
+    }
+    return payload;
+  } catch (error) {
+    if (error instanceof Error && error.name === "MindsJobExpiredError") {
+      throw error;
+    }
+    throw new TypeError("Job token is invalid.");
+  }
 }
 
 function normalizeSegment(value: string) {
@@ -76,27 +153,23 @@ export function findReplyAfterMessage(
     )[0];
 }
 
-async function sendAndWaitForVerifiedReply(
-  client: MindsClient,
-  alias: string,
-  messageText: string,
-) {
-  const requestStartedAt = Date.now();
-  await client.sendMessage({ alias, messageText });
-  const deadline = requestStartedAt + 270_000;
-
-  while (Date.now() < deadline) {
-    const history = await client.getHistory(alias, { limit: 100 });
-    const reply = findReplyAfterMessage(history, messageText, requestStartedAt);
-    if (reply) return { reply, history };
-    await new Promise((resolve) => setTimeout(resolve, 4_000));
+function requestMarker(requestId: string) {
+  if (!REQUEST_ID_PATTERN.test(requestId)) {
+    throw new TypeError("Request ID must be a valid opaque identifier.");
   }
+  return `Loreline request ID: ${requestId}`;
+}
 
-  const error = new Error(
-    "The Mind did not produce a verifiable reply before the timeout. Check history before retrying.",
-  );
-  error.name = "MindsTimeoutError";
-  throw error;
+function findExistingRequest(rows: MessageRecord[], marker: string) {
+  return rows
+    .filter(
+      (row) =>
+        row.senderType === 1 &&
+        row.messageText?.split("\n")[0]?.trim() === marker,
+    )
+    .sort(
+      (a, b) => Date.parse(b.createdAt ?? "") - Date.parse(a.createdAt ?? ""),
+    )[0];
 }
 
 export async function getMindsStatus() {
@@ -123,9 +196,10 @@ export async function getMindsStatus() {
   } as const;
 }
 
-export async function runMindsPoc(input: {
+export async function startMindsPoc(input: {
   action: PocAction;
   creatorId: string;
+  requestId: string;
   worldContext?: string;
   canonSource?: string;
   canonRule?: string;
@@ -137,15 +211,136 @@ export async function runMindsPoc(input: {
 
   await client.ensureConversation(alias, config.mindId);
 
-  const messageText = buildMindsMessage(input);
-  const outcome = await sendAndWaitForVerifiedReply(client, alias, messageText);
+  const marker = requestMarker(input.requestId);
+  const messageText = `${marker}\n${buildMindsMessage(input)}`;
+  const history = await client.getHistory(alias, { limit: 100 });
+  const existing = findExistingRequest(history, marker);
+  if (existing?.messageText && existing.messageText.trim() !== messageText.trim()) {
+    throw new TypeError("Request ID was already used with different content.");
+  }
+
+  let requestStartedAt = existing?.createdAt
+    ? Date.parse(existing.createdAt)
+    : Date.now();
+  if (!Number.isFinite(requestStartedAt)) requestStartedAt = Date.now();
+
+  if (!existing) {
+    await client.sendMessage({ alias, messageText });
+  }
+
+  const expiresAt = requestStartedAt + JOB_TOKEN_TTL_MS;
+  const jobToken = sealJobToken(
+    { version: 1, alias, messageText, requestStartedAt, expiresAt },
+    config.builderApiKey,
+  );
 
   return {
+    state: "pending" as const,
+    jobToken,
+    submittedAt: new Date(requestStartedAt).toISOString(),
+    expiresAt: new Date(expiresAt).toISOString(),
+  };
+}
+
+export async function pollMindsPoc(jobToken: string) {
+  const config = readConfig();
+  const payload = openJobToken(jobToken, config.builderApiKey);
+  const client = createMindsClient({ builderApiKey: config.builderApiKey });
+  const history = await client.getHistory(payload.alias, { limit: 100 });
+  const reply = findReplyAfterMessage(
+    history,
+    payload.messageText,
+    payload.requestStartedAt,
+  );
+
+  if (!reply) {
+    return {
+      state: "pending" as const,
+      expiresAt: new Date(payload.expiresAt).toISOString(),
+    };
+  }
+
+  return {
+    state: "completed" as const,
     reply: {
-      messageText: outcome.reply.messageText ?? "",
-      createdAt: outcome.reply.createdAt ?? null,
+      messageText: reply.messageText ?? "",
+      createdAt: reply.createdAt ?? null,
     },
   };
+}
+
+export function hasAutonomousFollowUp(rows: MessageRecord[]) {
+  const ordered = rows
+    .filter((row) => Number.isFinite(Date.parse(row.createdAt ?? "")))
+    .sort(
+      (a, b) => Date.parse(a.createdAt ?? "") - Date.parse(b.createdAt ?? ""),
+    );
+
+  for (let index = 1; index < ordered.length; index += 1) {
+    const previous = ordered[index - 1];
+    const current = ordered[index];
+    if (
+      previous.senderType !== 1 &&
+      current.senderType !== 1 &&
+      current.messageText?.trim()
+    ) {
+      return current;
+    }
+  }
+  return undefined;
+}
+
+export async function getAutonomyStatus() {
+  const builderApiKey = process.env.MINDS_BUILDER_API_KEY?.trim();
+  if (!builderApiKey || !process.env.MINDS_MIND_ID?.trim()) {
+    return { configured: false, verified: false, observedAt: null } as const;
+  }
+
+  const client = createMindsClient({ builderApiKey });
+  const history = await client.getHistory(
+    conversationAlias("steward-configuration"),
+    { limit: 100 },
+  );
+  const followUp = hasAutonomousFollowUp(history);
+  return {
+    configured: true,
+    verified: Boolean(followUp),
+    observedAt: followUp?.createdAt ?? null,
+  } as const;
+}
+
+export function isAuthorizedCron(request: Request) {
+  const secret = process.env.CRON_SECRET?.trim();
+  const authorization = request.headers.get("authorization") ?? "";
+  const expected = secret ? `Bearer ${secret}` : "";
+  if (!secret || authorization.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(authorization), Buffer.from(expected));
+}
+
+export async function triggerDueCaseReview(now = new Date()) {
+  const config = readConfig();
+  const alias = conversationAlias("due-case-trigger");
+  const client = createMindsClient({ builderApiKey: config.builderApiKey });
+  await client.ensureConversation(alias, config.mindId);
+
+  const date = now.toISOString().slice(0, 10);
+  const marker = `Loreline daily due-work trigger: ${date}`;
+  const messageText = [
+    marker,
+    `Current UTC time: ${now.toISOString()}`,
+    "Review persistent creator cases that are due or overdue.",
+    "Respect creator approval gates, do not repeat completed actions, and prepare only the next permitted follow-up.",
+    "Return a concise summary of checked, due, prepared, and blocked cases.",
+  ].join("\n");
+  const history = await client.getHistory(alias, { limit: 100 });
+  const alreadyTriggered = history.some(
+    (row) =>
+      row.senderType === 1 && row.messageText?.split("\n")[0]?.trim() === marker,
+  );
+  if (!alreadyTriggered) {
+    await client.sendMessage({ alias, messageText });
+  }
+  return { accepted: true, duplicate: alreadyTriggered } as const;
 }
 
 export function buildMindsMessage(input: {
@@ -203,8 +398,8 @@ export function publicMindsError(error: unknown) {
       message: error.message,
     };
   }
-  if (error instanceof Error && error.name === "MindsTimeoutError") {
-    return { status: 504, code: "reply_timeout", message: error.message };
+  if (error instanceof Error && error.name === "MindsJobExpiredError") {
+    return { status: 410, code: "job_expired", message: error.message };
   }
   return {
     status: 500,

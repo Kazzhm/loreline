@@ -6,8 +6,10 @@ import {
   conversationAlias,
   findReplyAfterMessage,
   getMindsStatus,
+  hasAutonomousFollowUp,
+  isAuthorizedCron,
   publicMindsError,
-  runMindsPoc,
+  startMindsPoc,
 } from "../lib/minds.ts";
 
 test("contains the Loreline product shell and metadata", async () => {
@@ -21,14 +23,17 @@ test("contains the Loreline product shell and metadata", async () => {
 });
 
 test("keeps conversation evidence behind the public API boundary", async () => {
-  const [routeSource, mindsSource] = await Promise.all([
+  const [routeSource, mindsSource, cronSource] = await Promise.all([
     readFile(new URL("../app/api/minds/poc/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/minds.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/cron/due-cases/route.ts", import.meta.url), "utf8"),
   ]);
   assert.match(routeSource, /\["seed", "review"\]/);
+  assert.match(routeSource, /pollMindsPoc/);
   assert.doesNotMatch(routeSource, /"history"/);
   assert.doesNotMatch(mindsSource, /return \{ alias, history/);
   assert.doesNotMatch(mindsSource, /fingerprint: outcome\.reply\.fingerprint/);
+  assert.match(cronSource, /isAuthorizedCron/);
 });
 
 test("reports missing Minds configuration without inventing a result", async () => {
@@ -45,9 +50,10 @@ test("reports missing Minds configuration without inventing a result", async () 
     });
 
     await assert.rejects(
-      runMindsPoc({
+      startMindsPoc({
         action: "review",
         creatorId: "glass-sea-studio",
+        requestId: "request_1234567890",
         submission: "A courier crosses the Glass Sea at midnight.",
       }),
       (error) => {
@@ -114,4 +120,47 @@ test("correlates replies by message time instead of fingerprint ordering", () =>
   ], sentMessageText, Date.parse("2026-08-16T12:09:20.000Z"));
 
   assert.equal(reply?.messageText, "Case filed.");
+});
+
+test("recognizes a Mind follow-up without a new creator message", () => {
+  const followUp = hasAutonomousFollowUp([
+    {
+      senderType: 1,
+      messageText: "Creator request",
+      createdAt: "2026-08-16T10:00:00.000Z",
+    },
+    {
+      senderType: 0,
+      messageText: "Initial decision",
+      createdAt: "2026-08-16T10:01:00.000Z",
+    },
+    {
+      senderType: 0,
+      messageText: "Autonomous follow-up",
+      createdAt: "2026-08-16T11:00:00.000Z",
+    },
+  ]);
+  assert.equal(followUp?.messageText, "Autonomous follow-up");
+});
+
+test("requires the configured bearer secret for cron requests", () => {
+  const previousSecret = process.env.CRON_SECRET;
+  process.env.CRON_SECRET = "a-strong-test-secret";
+  try {
+    assert.equal(
+      isAuthorizedCron(
+        new Request("https://example.test/api/cron/due-cases", {
+          headers: { authorization: "Bearer a-strong-test-secret" },
+        }),
+      ),
+      true,
+    );
+    assert.equal(
+      isAuthorizedCron(new Request("https://example.test/api/cron/due-cases")),
+      false,
+    );
+  } finally {
+    if (previousSecret === undefined) delete process.env.CRON_SECRET;
+    else process.env.CRON_SECRET = previousSecret;
+  }
 });

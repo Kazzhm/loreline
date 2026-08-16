@@ -36,7 +36,7 @@ Removing Minds collapses the core experience: Loreline would become a one-off ch
 
 - **Web:** Next.js, React, TypeScript
 - **Mind integration:** `@animocabrands/minds-client-lib` with server-only credentials
-- **Messaging:** stable conversation aliases, history retrieval, reply waiting, and live event support
+- **Messaging:** stable conversation aliases, duplicate-safe submission, short result polling, and history correlation
 - **State:** Mind conversation history for creator context; application records for workflow state
 - **Rights layer:** test-network contribution receipt planned after the Minds P0 is verified
 
@@ -48,6 +48,7 @@ Copy `.env.example` to `.env` and add values locally. Never commit credentials.
 MINDS_BUILDER_API_KEY=
 MINDS_MIND_ID=
 MINDS_CONVERSATION_PREFIX=loreline
+CRON_SECRET=
 ```
 
 The Builder API key is created in the Minds Builder Console and is sent only from server routes.
@@ -67,6 +68,7 @@ add these production environment variables before the authenticated demo run:
 - `MINDS_BUILDER_API_KEY` — mark as sensitive.
 - `MINDS_MIND_ID` — the UUID of the configured Mind.
 - `MINDS_CONVERSATION_PREFIX` — use `loreline`.
+- `CRON_SECRET` — a random secret used only to authenticate the daily due-work trigger.
 
 Redeploy after changing any environment variable. The site deliberately reports
 that setup is required until both required Minds values are available to its
@@ -94,7 +96,9 @@ Tests cover the rendered product shell. Minds network tests require real credent
 ## Security
 
 - Builder credentials stay server-side.
+- Result tokens are encrypted, expire after ten minutes, and never expose conversation identifiers.
 - Public routes never return credentials, conversation aliases, message fingerprints, or history.
+- The due-work route rejects requests without the configured bearer secret.
 - Stable aliases are normalized before use.
 - The product uses explicit approval gates before rights or publication actions.
 - Production actions must be idempotent and auditable.

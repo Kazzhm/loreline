@@ -1,24 +1,38 @@
 import { NextResponse } from "next/server";
 import {
+  pollMindsPoc,
   publicMindsError,
-  runMindsPoc,
+  startMindsPoc,
   type PocAction,
 } from "../../../../lib/minds";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Record<string, unknown>;
+    const operation = body.operation === "poll" ? "poll" : "start";
+
+    if (operation === "poll") {
+      const jobToken = typeof body.jobToken === "string" ? body.jobToken : "";
+      if (!jobToken) throw new TypeError("Job token is required.");
+      const result = await pollMindsPoc(jobToken);
+      return NextResponse.json(
+        { ok: true, ...result },
+        { headers: { "cache-control": "no-store" } },
+      );
+    }
+
     const action = body.action as PocAction;
     if (!(["seed", "review"] as const).includes(action)) {
       throw new TypeError("Action must be seed or review.");
     }
 
-    const result = await runMindsPoc({
+    const result = await startMindsPoc({
       action,
       creatorId: String(body.creatorId ?? ""),
+      requestId: String(body.requestId ?? ""),
       worldContext:
         typeof body.worldContext === "string" ? body.worldContext : undefined,
       canonSource:
@@ -29,9 +43,10 @@ export async function POST(request: Request) {
         typeof body.submission === "string" ? body.submission : undefined,
     });
 
-    return NextResponse.json({ ok: true, ...result }, {
-      headers: { "cache-control": "no-store" },
-    });
+    return NextResponse.json(
+      { ok: true, ...result },
+      { status: 202, headers: { "cache-control": "no-store" } },
+    );
   } catch (error) {
     const result = publicMindsError(error);
     return NextResponse.json(

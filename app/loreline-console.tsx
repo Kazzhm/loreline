@@ -9,17 +9,25 @@ type MindStatus =
   | { state: "error"; message: string };
 
 type PocResult = {
+  state?: "pending" | "completed";
+  jobToken?: string;
+  expiresAt?: string;
   reply?: { messageText: string };
   error?: { message: string };
 };
 
 const STEPS = [
-  ["Context loaded", "Standing canon and creator boundaries"],
-  ["Precedent recalled", "Prior exceptions and community rulings"],
-  ["Decision prepared", "Approve, revise, hold, or decline"],
-  ["Follow-up queued", "The next useful action remains attached"],
-  ["Attribution ready", "A portable receipt after creator approval"],
+  ["Request accepted", "A duplicate-safe request ID is attached"],
+  ["Conversation addressed", "The persistent creator relationship is reused"],
+  ["Mind working", "The browser polls without holding one long request"],
+  ["Reply verified", "The reply is correlated to this exact request"],
 ];
+
+type RunPhase = "idle" | "submitted" | "waiting" | "completed" | "error";
+
+function delay(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
 
 export default function LorelineConsole() {
   const [status, setStatus] = useState<MindStatus>({ state: "checking" });
@@ -39,6 +47,7 @@ export default function LorelineConsole() {
   );
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<PocResult | null>(null);
+  const [runPhase, setRunPhase] = useState<RunPhase>("idle");
 
   useEffect(() => {
     let active = true;
@@ -83,11 +92,15 @@ export default function LorelineConsole() {
     event.preventDefault();
     setPending(true);
     setResult(null);
+    setRunPhase("submitted");
     try {
-      const response = await fetch("/api/minds/poc", {
+      const requestId = crypto.randomUUID();
+      const startResponse = await fetch("/api/minds/poc", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
+          operation: "start",
+          requestId,
           action: mode,
           creatorId,
           worldContext,
@@ -96,10 +109,44 @@ export default function LorelineConsole() {
           submission,
         }),
       });
-      const body = (await response.json()) as PocResult;
-      setResult(body);
-    } catch {
-      setResult({ error: { message: "The request ended without a verified result." } });
+      const startBody = (await startResponse.json()) as PocResult;
+      if (!startResponse.ok || !startBody.jobToken || !startBody.expiresAt) {
+        throw new Error(startBody.error?.message || "The run could not be started.");
+      }
+
+      setRunPhase("waiting");
+      const deadline = Date.parse(startBody.expiresAt);
+      while (Date.now() < deadline) {
+        await delay(4_000);
+        const pollResponse = await fetch("/api/minds/poc", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            operation: "poll",
+            jobToken: startBody.jobToken,
+          }),
+        });
+        const pollBody = (await pollResponse.json()) as PocResult;
+        if (!pollResponse.ok) {
+          throw new Error(pollBody.error?.message || "Result check failed.");
+        }
+        if (pollBody.state === "completed" && pollBody.reply) {
+          setResult(pollBody);
+          setRunPhase("completed");
+          return;
+        }
+      }
+      throw new Error("The result window expired. Start a new run.");
+    } catch (error) {
+      setRunPhase("error");
+      setResult({
+        error: {
+          message:
+            error instanceof Error
+              ? error.message
+              : "The request ended without a verified result.",
+        },
+      });
     } finally {
       setPending(false);
     }
@@ -161,6 +208,7 @@ export default function LorelineConsole() {
               <button
                 type="button"
                 className={mode === "seed" ? "active" : ""}
+                disabled={pending}
                 onClick={() => {
                   setMode("seed");
                   setResult(null);
@@ -172,6 +220,7 @@ export default function LorelineConsole() {
               <button
                 type="button"
                 className={mode === "review" ? "active" : ""}
+                disabled={pending}
                 onClick={() => {
                   setMode("review");
                   setResult(null);
@@ -230,7 +279,9 @@ export default function LorelineConsole() {
 
             <button className="primary-action" disabled={!canRun || pending}>
               {pending
-                ? "Waiting for the Mind…"
+                ? runPhase === "submitted"
+                  ? "Submitting safely…"
+                  : "Mind working · checking result…"
                 : mode === "seed"
                   ? "Store canon in Session A"
                   : "Review from remembered context"}
@@ -250,7 +301,13 @@ export default function LorelineConsole() {
           <div className="trace-panel" aria-live="polite">
             <div className="trace-topline">
               <span>Mind activity trace</span>
-              <span>{result?.reply ? "Verified server-side reply" : "Awaiting a verified run"}</span>
+              <span>
+                {result?.reply
+                  ? "Verified server-side reply"
+                  : pending
+                    ? "Run continues safely"
+                    : "Awaiting a verified run"}
+              </span>
             </div>
 
             {result?.error ? (
@@ -277,7 +334,14 @@ export default function LorelineConsole() {
             <ol className="trace-list">
               {STEPS.map(([title, detail], index) => (
                 <li key={title}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <span>
+                    {runPhase === "completed" ||
+                    (index === 0 && runPhase !== "idle" && runPhase !== "error") ||
+                    (index === 1 && ["waiting", "completed"].includes(runPhase)) ||
+                    (index === 2 && runPhase === "waiting")
+                      ? "✓"
+                      : String(index + 1).padStart(2, "0")}
+                  </span>
                   <div>
                     <b>{title}</b>
                     <small>{detail}</small>

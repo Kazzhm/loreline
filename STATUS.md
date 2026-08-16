@@ -20,11 +20,15 @@
 - Durable creator context is now verified separately from conversation continuity.
 - Reply correlation now uses the exact sent message and timestamps instead of fingerprint ordering.
 - Public API no longer exposes conversation aliases, fingerprints, or history.
+- High-latency Mind work now uses duplicate-safe submission and short result polling.
+- A daily, authenticated product-owned due-work trigger is implemented.
+- A redacted autonomy-status check reports only whether an unprompted follow-up was observed.
 
 ## In Progress
 
 - Due-case autonomy evidence.
-- Asynchronous progress UX for high-latency runs.
+- Production verification of the asynchronous workflow.
+- Vercel `CRON_SECRET` configuration and scheduled-trigger verification.
 - Test-network contribution receipt.
 
 ## Broken
@@ -44,5 +48,5 @@
 ## Next
 
 1. Revise the due trigger and rerun autonomy proof.
-2. Add asynchronous progress and duplicate-action tests.
+2. Configure and verify the authenticated production due-work trigger.
 3. Add test-network contribution receipt only after autonomy works.

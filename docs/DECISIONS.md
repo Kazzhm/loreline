@@ -26,14 +26,21 @@ Mind history carries creator context and reasoning continuity. Application state
 
 ## 2026-08-16 — Keep Due-Case Authority Narrow
 
-The private due-case Skill uses a multi-case queue isolated by creator world.
-Each case and due time can fire once. The Skill may prepare and send a
-recommendation to the creator, but cannot approve, publish, contact third
-parties, transfer assets, issue receipts, or alter canon.
+Due-work actions remain isolated by creator world and idempotent per case and
+due time. They may prepare a recommendation for the creator, but cannot approve,
+publish, contact third parties, transfer assets, issue receipts, or alter canon.
 
 ## 2026-08-16 — Do Not Treat Calendar Storage as Autonomy
 
-The first due event was stored correctly but did not wake a cognition cycle.
+The first due event was stored correctly but did not produce a later Mind action.
 Autonomy remains incomplete until a later Mind message is produced without a
 new creator message. Loreline will add an authenticated product-owned due
 trigger rather than presenting event creation as execution.
+
+## 2026-08-16 — Separate submission from result retrieval
+
+Minds responses can take several minutes, so the public workflow uses a short submission request followed by encrypted-token polling. The request carries an opaque idempotency ID; retries reuse the original message instead of creating a duplicate. The token expires after ten minutes and contains no readable conversation data.
+
+## 2026-08-16 — Distinguish platform autonomy from product scheduling
+
+Loreline reports unprompted Mind follow-up as a separate boolean proof. A daily authenticated Vercel Cron route is a product-owned reliability fallback and is never presented as evidence of platform-initiated autonomy.
