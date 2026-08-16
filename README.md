@@ -38,7 +38,7 @@ Removing Minds collapses the core experience: Loreline would become a one-off ch
 - **Mind integration:** `@animocabrands/minds-client-lib` with server-only credentials
 - **Messaging:** stable conversation aliases, duplicate-safe submission, short result polling, and history correlation
 - **State:** Mind conversation history for creator context; application records for workflow state
-- **Rights layer:** test-network contribution receipt planned after the Minds P0 is verified
+- **Rights layer:** creator-signed contribution receipt storing content and agreement digests, never private work
 
 ## Configuration
 
@@ -91,7 +91,13 @@ npm test
 npm run lint
 ```
 
-Tests cover the rendered product shell. Minds network tests require real credentials and are never replaced with fabricated responses.
+Tests cover the rendered product shell, API security boundaries, reply correlation, scheduled-trigger evidence, and the Solidity receipt contract. Minds network tests require real credentials and are never replaced with fabricated responses.
+
+```bash
+npm run test:contracts
+```
+
+The receipt contract uses a pinned local Solidity compiler so contract tests do not depend on a compiler download at runtime.
 
 ## Security
 
@@ -105,7 +111,7 @@ Tests cover the rendered product shell. Minds network tests require real credent
 
 ## Roadmap
 
-P0 proves Minds persistence and the end-to-end canon review. P1 adds autonomous follow-up and a test-network contribution receipt. P2 adds creator-platform connections and richer community analytics.
+P0 proves Minds persistence and the end-to-end canon review. P1 adds autonomous follow-up, creator wallet approval, and a test-network contribution receipt. P2 adds creator-platform connections and richer community analytics.
 
 ## Team
 

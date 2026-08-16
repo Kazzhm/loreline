@@ -14,6 +14,6 @@ Deadline: 2026-08-28 23:59 HKT.
 | 8. Demo + submission | Aug 25–27 | Video, README, submission text, judge brief, and clean repository complete |
 | Buffer | Aug 28 | Deployment verification and submission only; no architecture rewrite |
 
-## Immediate Credential Boundary
+## Current Credential Boundary
 
-The product can be implemented and locally validated without exposing credentials, but the authenticated POC cannot complete until the entrant creates one Mind and one Builder API key. This is the only current user-owned setup dependency.
+Minds credentials and the production Cron secret are configured. Local contract work requires no wallet credential. A test-network deployment will require the entrant to approve a wallet signature and have test funds; no private key or mnemonic will be accepted through chat or committed to the repository.

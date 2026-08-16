@@ -23,18 +23,22 @@
 - High-latency Mind work now uses duplicate-safe submission and short result polling.
 - A daily, authenticated product-owned due-work trigger is implemented.
 - A redacted autonomy-status check reports only whether an unprompted follow-up was observed.
+- Production asynchronous submission and duplicate retry behavior are verified.
+- `CRON_SECRET` is loaded in production without exposing its value.
+- The contribution receipt contract compiles locally with a pinned Solidity compiler.
+- Five contract tests cover authority, duplicate prevention, digest validation, creator isolation, and tamper detection.
 
 ## In Progress
 
 - Due-case autonomy evidence.
-- Production verification of the asynchronous workflow.
-- Vercel `CRON_SECRET` configuration and scheduled-trigger verification.
-- Test-network contribution receipt.
+- First scheduled-trigger execution and reply observation.
+- Wallet-facing creator approval flow.
+- Test-network contribution receipt deployment.
 
 ## Broken
 
 - Autonomy proof: `NOT WORKING YET`; the scheduled proof did not produce a verified follow-up.
-- Test-network rights receipt: not started; intentionally behind Minds P0.
+- Test-network rights receipt: local contract works, but no network deployment exists yet.
 
 ## Risks
 
@@ -48,5 +52,5 @@
 ## Next
 
 1. Revise the due trigger and rerun autonomy proof.
-2. Configure and verify the authenticated production due-work trigger.
-3. Add test-network contribution receipt only after autonomy works.
+2. Observe the first authenticated production due-work trigger and correlated reply.
+3. Add the creator wallet approval flow, then deploy one test-network receipt.

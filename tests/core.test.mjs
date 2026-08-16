@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   buildMindsMessage,
   conversationAlias,
+  findReliabilityTriggerOutcome,
   findReplyAfterMessage,
   getMindsStatus,
   hasAutonomousFollowUp,
@@ -164,4 +165,26 @@ test("requires the configured bearer secret for cron requests", () => {
     if (previousSecret === undefined) delete process.env.CRON_SECRET;
     else process.env.CRON_SECRET = previousSecret;
   }
+});
+
+test("reports a product-owned trigger and its correlated reply separately", () => {
+  const triggerText = [
+    "Loreline daily due-work trigger: 2026-08-17",
+    "Current UTC time: 2026-08-17T00:00:00.000Z",
+  ].join("\n");
+  const outcome = findReliabilityTriggerOutcome([
+    {
+      senderType: 1,
+      messageText: triggerText,
+      createdAt: "2026-08-17T00:00:00.000Z",
+    },
+    {
+      senderType: 0,
+      messageText: "No cases were due.",
+      createdAt: "2026-08-17T00:00:40.000Z",
+    },
+  ]);
+
+  assert.equal(outcome.trigger?.messageText, triggerText);
+  assert.equal(outcome.reply?.messageText, "No cases were due.");
 });

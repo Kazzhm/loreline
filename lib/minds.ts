@@ -290,6 +290,45 @@ export function hasAutonomousFollowUp(rows: MessageRecord[]) {
   return undefined;
 }
 
+export function findReliabilityTriggerOutcome(rows: MessageRecord[]) {
+  const trigger = rows
+    .filter(
+      (row) =>
+        row.senderType === 1 &&
+        row.messageText
+          ?.split("\n")[0]
+          ?.trim()
+          .startsWith("Loreline daily due-work trigger:"),
+    )
+    .sort(
+      (a, b) => Date.parse(b.createdAt ?? "") - Date.parse(a.createdAt ?? ""),
+    )[0];
+  if (!trigger?.messageText || !trigger.createdAt) {
+    return { trigger: undefined, reply: undefined };
+  }
+
+  return {
+    trigger,
+    reply: findReplyAfterMessage(
+      rows,
+      trigger.messageText,
+      Date.parse(trigger.createdAt),
+    ),
+  };
+}
+
+async function getHistoryOrEmpty(
+  client: ReturnType<typeof createMindsClient>,
+  alias: string,
+) {
+  try {
+    return await client.getHistory(alias, { limit: 100 });
+  } catch (error) {
+    if (error instanceof MindsApiError && error.status === 404) return [];
+    throw error;
+  }
+}
+
 export async function getAutonomyStatus() {
   const builderApiKey = process.env.MINDS_BUILDER_API_KEY?.trim();
   const reliabilityTriggerConfigured = Boolean(process.env.CRON_SECRET?.trim());
@@ -299,20 +338,27 @@ export async function getAutonomyStatus() {
       verified: false,
       observedAt: null,
       reliabilityTriggerConfigured,
+      reliabilityTriggerObserved: false,
+      reliabilityLastTriggeredAt: null,
+      reliabilityReplyObservedAt: null,
     } as const;
   }
 
   const client = createMindsClient({ builderApiKey });
-  const history = await client.getHistory(
-    conversationAlias("steward-configuration"),
-    { limit: 100 },
-  );
-  const followUp = hasAutonomousFollowUp(history);
+  const [autonomyHistory, reliabilityHistory] = await Promise.all([
+    getHistoryOrEmpty(client, conversationAlias("steward-configuration")),
+    getHistoryOrEmpty(client, conversationAlias("due-case-trigger")),
+  ]);
+  const followUp = hasAutonomousFollowUp(autonomyHistory);
+  const reliability = findReliabilityTriggerOutcome(reliabilityHistory);
   return {
     configured: true,
     verified: Boolean(followUp),
     observedAt: followUp?.createdAt ?? null,
     reliabilityTriggerConfigured,
+    reliabilityTriggerObserved: Boolean(reliability.trigger),
+    reliabilityLastTriggeredAt: reliability.trigger?.createdAt ?? null,
+    reliabilityReplyObservedAt: reliability.reply?.createdAt ?? null,
   } as const;
 }
 

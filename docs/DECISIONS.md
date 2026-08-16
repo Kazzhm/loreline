@@ -44,3 +44,7 @@ Minds responses can take several minutes, so the public workflow uses a short su
 ## 2026-08-16 — Distinguish platform autonomy from product scheduling
 
 Loreline reports unprompted Mind follow-up as a separate boolean proof. A daily authenticated Vercel Cron route is a product-owned reliability fallback and is never presented as evidence of platform-initiated autonomy.
+
+## 2026-08-17 — Use a receipt registry instead of an NFT
+
+The rights layer records creator-signed content and agreement digests. It does not mint a collectible, publish private content, or claim to transfer copyright. The creator transaction is the approval authority, duplicate receipts revert, and changed agreement terms fail verification.

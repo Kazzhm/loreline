@@ -17,6 +17,9 @@ export async function GET() {
         verified: false,
         observedAt: null,
         reliabilityTriggerConfigured: Boolean(process.env.CRON_SECRET?.trim()),
+        reliabilityTriggerObserved: false,
+        reliabilityLastTriggeredAt: null,
+        reliabilityReplyObservedAt: null,
       },
       { status: result.status, headers: { "cache-control": "no-store" } },
     );

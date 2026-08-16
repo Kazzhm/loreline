@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "npm run build && node --experimental-strip-types --test tests/core.test.mjs",
+    "test": "npm run build && node --experimental-strip-types --test tests/core.test.mjs && npm run test:contracts",
+    "test:contracts": "hardhat test solidity",
     "lint": "eslint .",
     "minds:check": "minds doctor --pretty",
     "minds:poc": "node scripts/minds-poc.mjs"
@@ -28,6 +29,8 @@
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
+    "hardhat": "^3.13.0",
+    "solc": "^0.8.31",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3"
   },

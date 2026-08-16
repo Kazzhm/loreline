@@ -32,7 +32,7 @@ Creator records canon rule
 - Due-case Skill and autonomous follow-up evidence.
 - Creator override updates future precedent.
 - Visible context trace: loaded rule, matching precedent, prepared decision, next action.
-- Test-network contribution receipt with creator approval and idempotency.
+- Test-network contribution receipt with creator approval and idempotency. Local contract and five automated tests are working; wallet flow and network deployment remain.
 - Polished 1.5–2 minute demo.
 - Permission test for a sender outside the Circle.
 
