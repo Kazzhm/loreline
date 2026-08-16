@@ -34,6 +34,7 @@
 - Official BUIDL list is private, so competitor coverage is incomplete.
 - Public documentation does not expose a general scheduling endpoint.
 - Wallet metadata is available, but Builder API wallet signing is not documented.
+- A production reply completed close to the three-minute route timeout.
 - Only 12 calendar days remained at rule verification.
 
 ## Next
