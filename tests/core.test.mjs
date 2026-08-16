@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   buildMindsMessage,
   conversationAlias,
+  findReplyAfterMessage,
   getMindsStatus,
   publicMindsError,
   runMindsPoc,
@@ -76,4 +77,30 @@ test("requires explicit creator identity and canon authority before seeding", ()
   assert.match(message, /Creator-world identity:/);
   assert.match(message, /Canon authority and source:/);
   assert.match(message, /durable creator context/);
+});
+
+test("correlates replies by message time instead of fingerprint ordering", () => {
+  const sentMessageText = "Schedule the due-case proof.";
+  const reply = findReplyAfterMessage([
+    {
+      fingerprint: "zzzz-old-reply",
+      senderType: 0,
+      messageText: "Old inspection reply",
+      createdAt: "2026-08-16T12:09:08.281Z",
+    },
+    {
+      fingerprint: "aaaa-new-request",
+      senderType: 1,
+      messageText: sentMessageText,
+      createdAt: "2026-08-16T12:09:22.684Z",
+    },
+    {
+      fingerprint: "bbbb-new-reply",
+      senderType: 0,
+      messageText: "Case filed.",
+      createdAt: "2026-08-16T12:13:19.991Z",
+    },
+  ], sentMessageText, Date.parse("2026-08-16T12:09:20.000Z"));
+
+  assert.equal(reply?.messageText, "Case filed.");
 });
