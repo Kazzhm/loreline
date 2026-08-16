@@ -12,8 +12,8 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Record<string, unknown>;
     const action = body.action as PocAction;
-    if (!(["seed", "review", "history"] as const).includes(action)) {
-      throw new TypeError("Action must be seed, review, or history.");
+    if (!(["seed", "review"] as const).includes(action)) {
+      throw new TypeError("Action must be seed or review.");
     }
 
     const result = await runMindsPoc({
