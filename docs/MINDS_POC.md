@@ -133,7 +133,16 @@ Mind replies.
 
 ## Autonomy Proof Target
 
-P1 adds a due-case Skill. A creator marks a case for later review, exits, and the equipped Mind evaluates the due case after the trigger, producing a new history record without a new creator message at that moment. Until that run is recorded, autonomy remains `NOT WORKING YET`.
+Autonomous execution remains `NOT WORKING YET`. A scheduled proof did not
+produce a later Mind action during the observation window. Loreline will revise
+the trigger and rerun the proof; scheduling a case is not treated as execution.
+
+## Reply Correlation
+
+A long-running operator request exposed a stale-reply match when opaque message
+fingerprints were compared as ordered strings. Loreline now locates the exact
+sent creator message in official history and accepts only the first Mind message
+with a later timestamp. A regression test covers the stale-reply case.
 
 ## Failure Cases
 
@@ -143,6 +152,7 @@ P1 adds a due-case Skill. A creator marks a case for later review, exits, and th
 | Missing Mind ID | 503 with setup-required state |
 | Invalid creator ID | 400; no alias created |
 | API timeout | 504-style application error; no success claim |
+| Stale reply | Reject replies older than the exact sent message |
 | Malformed reply | Preserve raw history metadata and mark response invalid |
 | History unavailable | Report unavailable; do not infer memory |
 | Duplicate seed | Same alias; idempotent conversation creation |
