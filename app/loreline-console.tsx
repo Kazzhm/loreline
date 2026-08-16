@@ -8,17 +8,8 @@ type MindStatus =
   | { state: "connected"; enabled: boolean | null }
   | { state: "error"; message: string };
 
-type HistoryItem = {
-  fingerprint: string;
-  sender: "creator" | "mind";
-  messageText: string;
-  createdAt: string | null;
-};
-
 type PocResult = {
-  alias?: string;
   reply?: { messageText: string };
-  history?: HistoryItem[];
   error?: { message: string };
 };
 
@@ -259,7 +250,7 @@ export default function LorelineConsole() {
           <div className="trace-panel" aria-live="polite">
             <div className="trace-topline">
               <span>Mind activity trace</span>
-              <span>{result?.alias || "Awaiting a verified run"}</span>
+              <span>{result?.reply ? "Verified server-side reply" : "Awaiting a verified run"}</span>
             </div>
 
             {result?.error ? (
