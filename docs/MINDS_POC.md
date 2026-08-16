@@ -33,6 +33,10 @@ that complete rule and proposed a living courier carrying one through the
 gate. The Mind recalled both constraints, declined the proposal, explained the
 two violations, and proposed a canon-amendment or rewrite path.
 
+Observed response time varied substantially. Session B completed close to the
+route's three-minute timeout, so timeout recovery and asynchronous progress
+handling remain submission-critical reliability work.
+
 ## Configuration
 
 1. Create a Mind at https://www.hellominds.ai/.
