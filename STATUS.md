@@ -16,16 +16,17 @@
 - Session A and Session B completed as separate production requests.
 - Session B recalled both unique canon constraints and returned a grounded decision.
 - Independent history retrieval returned the complete four-record conversation.
+- A fresh conversation with no prior history recalled the stored world and both canon constraints.
+- Durable creator context is now verified separately from conversation continuity.
 
 ## In Progress
 
-- Durable canon memory after supplying full creator-world context.
 - Due-case Skill design and autonomy evidence.
+- Asynchronous reply recovery for high-latency runs.
 - Test-network contribution receipt.
 
 ## Broken
 
-- Durable canon memory: `NOT WORKING YET`; the Mind currently treats the verified rule as conversation-scoped.
 - Autonomy proof: `NOT WORKING YET` until a real Mind and due-case Skill are configured.
 - Test-network rights receipt: not started; intentionally behind Minds P0.
 
@@ -39,7 +40,6 @@
 
 ## Next
 
-1. Supply project identity and canon-source context, then rerun durable-memory proof.
-2. Build autonomous due-case Skill.
-3. Add timeout recovery and duplicate-action tests.
-4. Add test-network contribution receipt only after Minds P0 works.
+1. Build autonomous due-case Skill.
+2. Add timeout recovery and duplicate-action tests.
+3. Add test-network contribution receipt only after autonomy works.
