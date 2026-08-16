@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       "build",
       "inspect",
       "schedule",
+      "diagnose",
       "history",
     ];
     if (!allowed.includes(action)) {
