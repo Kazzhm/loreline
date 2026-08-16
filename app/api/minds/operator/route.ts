@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 const OPERATOR_TOKEN_HASH =
-  "325690accafa663b001389c2b73c6708cf4a0b6d443cbae1dbf23fd682f9a821";
+  "b596a4f99223a0c33ebe76f1c584aa78b044f619b3c6f3c83ef1fa8572877a53";
 
 function isAuthorized(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
