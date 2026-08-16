@@ -48,7 +48,15 @@ if (action === 'seed') {
     console.error('Seed text must be at least 12 characters.');
     process.exit(2);
   }
-  messageText = `Store this as a standing canon rule for this creator world.\nRule: ${value.trim()}\nAcknowledge and preserve it for future community reviews.`;
+  const worldContext = `${creatorId} is the creator-owned world represented by this persistent Loreline canon register.`;
+  messageText = [
+    `Creator-world identity: ${worldContext}`,
+    'Canon authority and source: Creator-approved Loreline canon register',
+    'This persistent conversation is the creator-approved working canon register for this project.',
+    `Standing canon rule: ${value.trim()}`,
+    'Preserve the identity, authority, and rule as durable creator context and apply them in future community reviews under this creator relationship.',
+    'Confirm the stored context, its authority, the practical boundary, and how you will use it in a later review.',
+  ].join('\n');
 } else {
   messageText = 'Continue the existing creator-world review without asking me to repeat prior canon. A community member proposes that a traveler crosses the forbidden boundary at midnight. Identify the remembered rule that matters, decide whether this fits canon, and give the next action.';
 }
