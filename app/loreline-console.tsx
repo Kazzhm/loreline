@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 type MindStatus =
   | { state: "checking" }
   | { state: "missing" }
-  | { state: "connected"; name: string; enabled: boolean | null }
+  | { state: "connected"; enabled: boolean | null }
   | { state: "error"; message: string };
 
 type HistoryItem = {
@@ -60,7 +60,6 @@ export default function LorelineConsole() {
         } else if (body.connected) {
           setStatus({
             state: "connected",
-            name: body.mind?.name || "Configured Mind",
             enabled: body.mind?.isEnabled ?? null,
           });
         } else {
@@ -83,7 +82,7 @@ export default function LorelineConsole() {
   const statusLabel = useMemo(() => {
     if (status.state === "checking") return "Checking Mind";
     if (status.state === "connected") {
-      return status.enabled === false ? "Mind paused" : `${status.name} connected`;
+      return status.enabled === false ? "Mind paused" : "Mind connected";
     }
     if (status.state === "missing") return "Mind setup required";
     return "Connection needs attention";
