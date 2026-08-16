@@ -11,16 +11,21 @@
 - Interactive two-session product shell is working.
 - Missing-configuration and API failure states are explicit.
 - Render and API boundary tests pass.
+- Vercel production deployment is reachable.
+- Authenticated production status confirms enabled Mind `Kase`.
+- Session A and Session B completed as separate production requests.
+- Session B recalled both unique canon constraints and returned a grounded decision.
+- Independent history retrieval returned the complete four-record conversation.
 
 ## In Progress
 
-- Real-Mind persistence evidence.
+- Durable canon memory after supplying full creator-world context.
 - Due-case Skill design and autonomy evidence.
 - Test-network contribution receipt.
 
 ## Broken
 
-- Authenticated Minds calls: `NOT WORKING YET` because `MINDS_BUILDER_API_KEY` and `MINDS_MIND_ID` are not configured.
+- Durable canon memory: `NOT WORKING YET`; the Mind currently treats the verified rule as conversation-scoped.
 - Autonomy proof: `NOT WORKING YET` until a real Mind and due-case Skill are configured.
 - Test-network rights receipt: not started; intentionally behind Minds P0.
 
@@ -33,7 +38,7 @@
 
 ## Next
 
-1. Configure a real Mind and Builder API key.
-2. Run separate-session persistence proof.
-3. Build autonomous due-case Skill.
+1. Supply project identity and canon-source context, then rerun durable-memory proof.
+2. Build autonomous due-case Skill.
+3. Add timeout recovery and duplicate-action tests.
 4. Add test-network contribution receipt only after Minds P0 works.
