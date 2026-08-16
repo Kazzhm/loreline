@@ -6,7 +6,7 @@ import {
 } from "@animocabrands/minds-client-lib";
 
 export type PocAction = "seed" | "review" | "history";
-export type OperatorAction = "skills" | "propose" | "build" | "inspect" | "schedule" | "history";
+export type OperatorAction = "skills" | "propose" | "build" | "inspect" | "schedule" | "diagnose" | "history";
 
 export class MindsSetupError extends Error {
   constructor(message: string) {
@@ -192,6 +192,12 @@ export async function runMindsOperatorAction(action: OperatorAction) {
       "The unresolved case is a creator review of a community proposal that conflicts with stored canon. Its approval state is pending and the only allowed action is to prepare a recommendation for the creator.",
       "Schedule the due time for five minutes from now. At that time, without waiting for another human message, send a proactive follow-up in this conversation containing: recalled context, provisional decision, one reason, and next action.",
       "Do not approve, publish, contact a contributor, transfer assets, or issue a receipt. Confirm the scheduled due time and the approval boundary now.",
+    ].join("\n"),
+    diagnose: [
+      "Perform a read-only diagnosis of Loreline Due Case Steward case proof-001.",
+      "Its confirmed due time was 2026-08-16T12:14:23Z, but no autonomous follow-up appeared in the filing conversation during the observation window.",
+      "Inspect the stored case, calendar event, trigger state, execution log, and historyLog. Explain whether the event was created, whether a cognition cycle woke, and the exact failure or pending state.",
+      "Do not fire, resend, reschedule, modify, pause, resolve, or delete the case or event. Do not change the Skill.",
     ].join("\n"),
   };
 
