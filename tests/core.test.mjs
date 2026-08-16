@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
+  buildMindsMessage,
   conversationAlias,
   getMindsStatus,
   publicMindsError,
@@ -55,4 +56,24 @@ test("reports missing Minds configuration without inventing a result", async () 
 test("creates stable, creator-scoped conversation aliases", () => {
   assert.equal(conversationAlias("Glass Sea Studio"), "loreline-glass-sea-studio");
   assert.throws(() => conversationAlias("??"), /at least three/i);
+});
+
+test("requires explicit creator identity and canon authority before seeding", () => {
+  assert.throws(
+    () => buildMindsMessage({
+      action: "seed",
+      canonRule: "Blue lanterns may not cross the western gate.",
+    }),
+    /creator-world identity/i,
+  );
+
+  const message = buildMindsMessage({
+    action: "seed",
+    worldContext: "The Ember Archive is managed by Glass Sea Studio.",
+    canonSource: "Creator-approved canon register",
+    canonRule: "Blue lanterns may not cross the western gate.",
+  });
+  assert.match(message, /Creator-world identity:/);
+  assert.match(message, /Canon authority and source:/);
+  assert.match(message, /durable creator context/);
 });
