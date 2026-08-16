@@ -23,3 +23,17 @@ Each creator gets a deterministic alias. This makes continuity reproducible acro
 ## 2026-08-16 — Separate Workflow State from Mind History
 
 Mind history carries creator context and reasoning continuity. Application state carries case status, idempotency keys, timestamps, and receipts. Neither layer is presented as the other.
+
+## 2026-08-16 — Keep Due-Case Authority Narrow
+
+The private due-case Skill uses a multi-case queue isolated by creator world.
+Each case and due time can fire once. The Skill may prepare and send a
+recommendation to the creator, but cannot approve, publish, contact third
+parties, transfer assets, issue receipts, or alter canon.
+
+## 2026-08-16 — Do Not Treat Calendar Storage as Autonomy
+
+The first due event was stored correctly but did not wake a cognition cycle.
+Autonomy remains incomplete until a later Mind message is produced without a
+new creator message. Loreline will add an authenticated product-owned due
+trigger rather than presenting event creation as execution.
