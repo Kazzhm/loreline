@@ -5,9 +5,10 @@
 Authenticated Minds connectivity and cross-request conversation continuity are
 `WORKING` in the production deployment.
 
-Durable canon memory beyond the persistent conversation is `NOT WORKING YET`.
-The configured Mind correctly recalled the earlier rule but explicitly treated
-it as conversation-scoped until more creator-world context is supplied.
+Durable canon memory beyond the persistent conversation is also `WORKING`.
+The verified seed supplies a complete creator-world identity, an explicit canon
+authority, and authorization to use the persistent conversation as the working
+canon register.
 
 Verified on 2026-08-16:
 
@@ -18,6 +19,8 @@ Verified on 2026-08-16:
 - Server routes and command-line scripts use the official client library.
 - Production status endpoint returned `configured: true` and `connected: true`.
 - The configured Mind returned real replies and is enabled.
+- A new conversation with no prior history recalled durable context established
+  in a different conversation.
 
 ## Verified Production Run
 
@@ -36,6 +39,29 @@ two violations, and proposed a canon-amendment or rewrite path.
 Observed response time varied substantially. Session B completed close to the
 route's three-minute timeout, so timeout recovery and asynchronous progress
 handling remain submission-critical reliability work.
+
+## Durable Memory Proof
+
+Verified on 2026-08-16 with a new fictional creator world and no reused raw
+conversation evidence in the public repository:
+
+1. Session A supplied the creator-world identity, creator-approved canon source,
+   and a two-clause standing rule. The Mind explicitly distinguished this from
+   the earlier incomplete setup and accepted it as durable creator context.
+2. Session B was a separate request in the same conversation. It omitted the
+   identity, authority, and complete rule, then correctly recalled and applied
+   both clauses.
+3. A third request used a fresh conversation with no previous history and again
+   omitted the identity, authority, and rule. The Mind recalled the correct
+   world and both clauses, accepted the compliant part of the proposal, and
+   declined the conflicting part.
+4. Independent history retrieval for the first conversation returned four
+   non-empty records. The fresh conversation returned only its two new records,
+   distinguishing durable memory from copied conversation history.
+
+Conversation identifiers, message fingerprints, and raw replies are excluded
+from the public repository. Observed reply time in this run ranged from under a
+minute to nearly two minutes.
 
 ## Configuration
 
@@ -129,5 +155,7 @@ P1 adds a due-case Skill. A creator marks a case for later review, exits, and th
 - [x] Session A request ends before Session B starts.
 - [x] Session B recalls the rule without complete prompt repetition.
 - [x] Independent history retrieval returns the full four-record sequence.
+- [x] A fresh conversation recalls the authorized world and both canon clauses.
+- [x] Fresh-conversation history contains only its own two records.
 - [x] Public evidence contains no credentials.
 - [ ] Autonomy proof produces a later Mind action.
