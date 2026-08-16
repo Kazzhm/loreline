@@ -12,7 +12,7 @@
 - Missing-configuration and API failure states are explicit.
 - Render and API boundary tests pass.
 - Vercel production deployment is reachable.
-- Authenticated production status confirms enabled Mind `Kase`.
+- Authenticated production status confirms that the configured Mind is enabled.
 - Session A and Session B completed as separate production requests.
 - Session B recalled both unique canon constraints and returned a grounded decision.
 - Independent history retrieval returned the complete four-record conversation.
